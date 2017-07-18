@@ -49,4 +49,4 @@ function fetchAllsvenskan() {
    
 };
 
-module.exports.allsvenskan = fetchAllsvenskan;
+module.exports.scrape = fetchAllsvenskan;

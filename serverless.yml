@@ -29,6 +29,7 @@ provider:
     - Effect: Allow
       Action:
         - s3:PutObject
+        - s3:GetObject
       Resource: "arn:aws:s3:::${self:custom.bucket}/*"
 
 # you can overwrite defaults here
@@ -71,6 +72,21 @@ functions:
       BUCKET: ${self:custom.bucket}
     events:
       - http: GET hello
+  saveShuffle:
+    handler: handler.saveShuffle
+    environment:
+      BUCKET: ${self:custom.bucket}
+    events:
+      - http: POST shuffle
+  getShuffle:
+    handler: handler.getShuffle
+    environment:
+      BUCKET: ${self:custom.bucket}
+    events:
+      - http: 
+          path: shuffle
+          method: get
+          cors: true
   allsvenskan:
     handler: handler.allsvenskan
     environment:

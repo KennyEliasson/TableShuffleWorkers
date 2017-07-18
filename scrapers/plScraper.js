@@ -44,4 +44,4 @@ function fetchPremierLeague() {
    
 };
 
-module.exports.pl = fetchPremierLeague;
+module.exports.scrape = fetchPremierLeague;
