@@ -8,7 +8,7 @@ const shortid = require("shortid");
 module.exports.allsvenskan = (event, context, callback) => {
    Promise.all([allsvenskanScraper.scrape()])
     .then((data) => {
-      var allsvenskanResults = data[1];
+      var allsvenskanResults = data[0];
       leagueRepository("allsvenskan",  { name: 'Allsvenskan', teams: allsvenskanResults.teams }, allsvenskanResults.fixtures);
 
       callback(null, { message: 'Allsvenskan loaded successfully', event });
@@ -19,7 +19,7 @@ module.exports.allsvenskan = (event, context, callback) => {
 module.exports.pl = (event, context, callback) => {
    Promise.all([plScraper.scrape()])
     .then((data) => {
-      var premierleagueResults = data[1];
+      var premierleagueResults = data[0];
       leagueRepository("premierleague",  { name: 'Premier League', teams: premierleagueResults.teams }, premierleagueResults.fixtures);
 
       callback(null, { message: 'Premier league loaded successfully', event });
@@ -86,7 +86,7 @@ module.exports.saveShuffle = (event, ctx, callback) => {
         if(err) {
           response.body = JSON.stringify({ message: 'Could not upload to S3' });
         } else {
-          response.body = JSON.stringify({ message: 'Success' });
+          response.body = JSON.stringify({ message: 'Success', key: key });
         }
         
         callback(null, response);

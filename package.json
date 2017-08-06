@@ -11,6 +11,7 @@
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
     "request": "^2.81.0",
-    "shortid": "^2.2.8"
+    "shortid": "^2.2.8",
+    "aws-sdk": "^2.84.0"
   }
 }

@@ -5,7 +5,7 @@ const {leagueRepository} = require('./leagueRepository');
 Promise.all([plScraper.scrape(), allsvenskanScraper.scrape()])
     .then((data) => {
         var plResults = data[0];
-        leagueRepository("premierleague",  { name: 'Premier League', teams: allsvenskanResults.teams }, allsvenskanResults.fixtures);
+        leagueRepository("premierleague",  { name: 'Premier League', teams: plResults.teams }, plResults.fixtures);
 
         var allsvenskanResults = data[1];
         leagueRepository("allsvenskan",  { name: 'Allsvenskan', teams: allsvenskanResults.teams }, allsvenskanResults.fixtures);
