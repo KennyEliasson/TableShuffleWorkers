@@ -1,6 +1,6 @@
 const allsvenskanScraper = require('./scrapers/allsvenskanScraper');
-const plScraper = require('./scrapers/plScraper');
-const {leagueRepository} = require('./leagueRepository');
+const plScraper = require('./scrapers/plScraper-terrikon');
+const leagueRepository = require('./leagueRepository');
 const AWS = require('aws-sdk');
 const shortid = require("shortid");
 
@@ -9,7 +9,7 @@ module.exports.allsvenskan = (event, context, callback) => {
    Promise.all([allsvenskanScraper.scrape()])
     .then((data) => {
       var allsvenskanResults = data[0];
-      leagueRepository("allsvenskan",  { name: 'Allsvenskan', teams: allsvenskanResults.teams }, allsvenskanResults.fixtures);
+      leagueRepository.save("allsvenskan",  { name: 'Allsvenskan', teams: allsvenskanResults.teams }, allsvenskanResults.fixtures);
 
       callback(null, { message: 'Allsvenskan loaded successfully', event });
     })
@@ -17,15 +17,19 @@ module.exports.allsvenskan = (event, context, callback) => {
 }
 
 module.exports.pl = (event, context, callback) => {
-   Promise.all([plScraper.scrape()])
-    .then((data) => {
-      var premierleagueResults = data[0];
-      leagueRepository("premierleague",  { name: 'Premier League', teams: premierleagueResults.teams }, premierleagueResults.fixtures);
 
-      callback(null, { message: 'Premier league loaded successfully', event });
+  var seasonIds = event.seasons.map((season) => season.id).join(", ");
+  
+  Promise.all(event.seasons.map((season) => plScraper.scrape(season.id)))
+    .then((data) => {
+      for(var i = 0;i<data.length;i++) {
+        var currentResults = data[i];
+        leagueRepository.save("premierleague-" + currentResults.seasonId,  { name: 'Premier League', teams: currentResults.teams }, currentResults.fixtures);
+      }
+      callback(null, { message: 'Premier league ' + seasonIds + ' loaded successfully', event });
     })
     .catch((err) => console.log(err));
-}
+};
 
 module.exports.getShuffle = (event, ctx, callback) => {
   var shuffleId = event.queryStringParameters.id;
@@ -43,22 +47,22 @@ module.exports.getShuffle = (event, ctx, callback) => {
   const s3 = new AWS.S3();
   var key = "shuffle-" + shuffleId;
 
- s3.getObject({
-        Bucket: process.env.BUCKET + "/shuffles",
-        Key: key + ".json",
-    }, function(err, data) {
-      if(err) {
-        callback(err, {
-          statusCode: 500,
-          body: JSON.stringify({
-            message: 'Could not get shuffle'
-          })
-        });
-      } else {
-        callback(null, { statusCode: 200, body: data.Body.toString() });
-      }
-    });
-}
+  s3.getObject({
+    Bucket: process.env.BUCKET + "/shuffles",
+    Key: key + ".json",
+  }, function(err, data) {
+    if(err) {
+      callback(err, {
+        statusCode: 500,
+        body: JSON.stringify({
+          message: 'Could not get shuffle'
+        })
+      });
+    } else {
+      callback(null, { statusCode: 200, body: data.Body.toString() });
+    }
+  });
+};
 
 module.exports.saveShuffle = (event, ctx, callback) => {
   const s3 = new AWS.S3();
